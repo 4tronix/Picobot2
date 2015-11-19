@@ -28,6 +28,7 @@ Picobot2 Software
 ================
 Install the Picobot2 library using the Arduino IDE library manager.
 This will also install the following example files within the examples folder of the IDE
+You will also need to install the FastLED library: In the Arduino IDE, go to the Menu item Sketch/Include Library/Manage Libraries then search for FastLED and select Install.
 
  - DemoAll - Uses the Mode button to switch between 5 different demos.
    After pressing the button it flashes the LEDs the number of times for
