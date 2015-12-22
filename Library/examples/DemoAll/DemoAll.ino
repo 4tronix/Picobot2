@@ -5,8 +5,8 @@
   1) Flashing Lights
   2) Line Follower
   3) Light seeker
-  4) Obstacle avoider (not every Picobot has ultrasonic)
-  5) Constant distance (not every Picobot has ultrasonic)
+  4) Obstacle avoider
+  5) Constant distance
   
   Purpose: Initial test program for shipping
  
@@ -23,16 +23,20 @@ Picobot2 pb2;
 #define LINE 2
 #define LIGHT 3
 #define AVOIDER 4
-#define CONSTDIST 5
+#define FOLLOW 5
 #define LASTPROG 5
 
 int state = 1;      // initial state is 1) Line Follower
 bool lastButton = false;  // Initial state of button is OFF
 int bright = 40;    // brightness value for RGB LEDs
 
+int baseLeft=0; // Global variables foe the light sensor readings when first activating the light follow routine
+int baseRight=0;
+
 // the setup routine runs once when you press reset:
 void setup()
-{                
+{
+  pb2.begin();
   Serial.begin(115200);
   FlashAll(200);  // Sign on with a slow flashing display
 }
@@ -44,19 +48,19 @@ void loop()
 {
   switch (state)
   {
-    case 1:
+    case FLASH:
       flashLEDs();
       break;
-    case 2:
+    case LINE:
       lineFollow();
       break;
-    case 3:
+    case LIGHT:
       lightSeek();
       break;
-    case 4:
+    case AVOIDER:
       obstacleAvoid();
       break;
-    case 5:
+    case FOLLOW:
       constDistance();
       break;
   }
@@ -68,18 +72,23 @@ void loop()
       state = 1;
     flashCount(state);
     //Serial.println("New state: " + String(state));
+    if (state == LIGHT)
+    {
+      baseLeft = pb2.lightRead(true);   // pb2.lightRead(true) gets the initial left light sensor value
+      baseRight = pb2.lightRead(false);  // pb2.lightRead(false) gets the initial right light sensor value
+    }
   }
 }
 
-void flashLEDs()  // State 1
+void flashLEDs()  // State 1 FLASH
 {
   FlashAll(30);
 }
 
-void lineFollow()  // State 2
+void lineFollow()  // State 2 LINE
 {
-  int lval = map(pb2.lineRead(true), 100, 320, 0, 255); // pb2.lineRead(true) gets the left line sensor value and maps the usable range into the full motor speed range
-  int rval = map(pb2.lineRead(false), 100, 320, 0, 255); // pb2.lineRead(false) gets the right line sensor value
+  int lval = map(pb2.lineRead(true), 120, 320, 0, 255); // pb2.lineRead(true) gets the left line sensor value and maps the usable range into the full motor speed range
+  int rval = map(pb2.lineRead(false), 120, 320, 0, 255); // pb2.lineRead(false) gets the right line sensor value
   pb2.turnForward(lval, rval);
   //Serial.println("Left: " + String(lval) + "  Right: " + String(rval));
   if (rval < lval-50)
@@ -91,10 +100,10 @@ void lineFollow()  // State 2
   delay(50);
 }
 
-void lightSeek()  // State 3
+void lightSeek2()  // State 3 LIGHT
 {
-  int ldrL = pb2.lightRead(true);   // pb2.lightRead(true) gets the left light sensor value
-  int ldrR = pb2.lightRead(false);  // pb2.lightRead(false) gets the right light sensor value
+  int ldrL = pb2.lightRead(true);   // pb2.lightRead(true) gets the current left light sensor value
+  int ldrR = pb2.lightRead(false);  // pb2.lightRead(false) gets the current right light sensor value
   int lval=0, rval=0;
   if (ldrL > ldrR)
     rval = map(ldrL-ldrR, 0, 500, 0, 255);
@@ -105,7 +114,28 @@ void lightSeek()  // State 3
   delay(50);
 }
 
-void obstacleAvoid() // State 4
+void lightSeek()  // State 3 LIGHT
+{
+  int ldrL = pb2.lightRead(true);   // pb2.lightRead(true) gets the current left light sensor value
+  int ldrR = pb2.lightRead(false);  // pb2.lightRead(false) gets the current right light sensor value
+  int threshMove = 70;
+  int threshSpin = 200;
+  int changeL = abs(ldrL-baseLeft);
+  int changeR = abs(ldrR-baseRight);
+  Serial.println(String(baseLeft)+":"+String(ldrL)+"  "+String(baseRight)+":"+String(ldrR)+"  "+String(changeL)+":"+String(changeR)+":"+String(abs(changeL-changeR)));
+  if ((ldrL < (baseLeft-threshMove)) && (ldrR < (baseRight-threshMove)) && (abs(changeL-changeR) < threshSpin))
+    pb2.forward(150);
+  else if (ldrL < (baseLeft-threshMove))
+    pb2.spinLeft(150);
+  else if (ldrR < (baseRight-threshMove))
+    pb2.spinRight(150);
+  else
+    pb2.stop(false);
+  delay(50);
+}
+
+
+void obstacleAvoid() // State 4 AVOIDER
 {
   int cm = pb2.distanceRead();
   //Serial.println("Distance: " + String(cm));
@@ -114,7 +144,7 @@ void obstacleAvoid() // State 4
     pb2.pixelAllSet(CRGB(bright, bright, 0));  // Yellow
     pb2.reverse(200);
     delay(1000);
-    pb2.pixelAllSet(CRGB(0, bright, 0));  // Greeb
+    pb2.pixelAllSet(CRGB(0, bright, 0));  // Green
     pb2.spinRight(120);
     delay(300);
   }
@@ -126,8 +156,10 @@ void obstacleAvoid() // State 4
   }
 }
 
-void constDistance()  // State 5
+void constDistance()  // State 5 FOLLOW
 {
+  // This routine moves backwards if too close, and forwards if too far away
+  // It could be improved by changing the speed to depend on the distance, to give a "softer" start and stop
   int cm = pb2.distanceRead();
   //Serial.println("Distance: " + String(cm));
   if (cm  < 9)

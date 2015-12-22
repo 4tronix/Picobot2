@@ -1,6 +1,6 @@
 // Picobot2 Analog Inputs Test
-// This code is designed for the 4tronix Picobot
-// Reads values from the 2 LDRs and the 2 Line Follower Sensors
+// This code is designed for the 4tronix Picobot2
+// Reads values from the 2 lights sensors and the 2 Line Follower Sensors
 // Sends the values to the serial port and the software serial port, so can be read via a Bluetooth BLE device (if Bluetooth is fitted on your Picobot2)
 //
 // Purpose: Demonstrate use of the analog sensors 
@@ -13,10 +13,12 @@ Picobot2 pb2;
 #include <SoftwareSerial.h>
 SoftwareSerial BLE (2, 3); // RX, TX
 
+// Initialise the serial libraries and Picobot2 libraries
 void setup()
 {
-  Serial.begin(115200);
-  BLE.begin(9600);
+  pb2.begin();
+  Serial.begin(115200); // You can change this baud rate to match the speed of the serial monitor
+  BLE.begin(9600);  // the BLE module should be run at 9600 baud so don't change this
 }
 
 void loop()

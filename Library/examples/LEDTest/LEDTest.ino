@@ -1,43 +1,35 @@
 ///////////////////////////////////////////////////////////////////////////////////////////
 //
 // Testing the LEDs on Picobot2
-// Sets Red, Green, Blue, White in turn on RGB and also the Blue LED
+// Sets Red, Green, Blue, White in turn
 //    
 ///////////////////////////////////////////////////////////////////////////////////////////
 
-// Picobot LED Demonstration
-// This code is designed for the 4tronix Picobot2
-// Sets Red, Green, Blue, White in turn
-//
-// Purpose: Demonstrate use of the lights in the library 
-//
-// This example code is licensed under CC-BY-SA https://creativecommons.org/licenses/by-sa/3.0/
-
 #include "Picobot2.h"
-Picobot2 pb2;
 
+Picobot2 pb2;  // create a Picobot2 object to work with
+
+// This function sets up the leds and tells the controller about them
 void setup()
 {
-  // Nothing needs setting up for this test
+  pb2.begin();  // initialise the Picobot2
 }
 
-int wait = 500; // sets the speed of the flashing. The smaller the number, the faster it goes
-int bright = 40;  // sets the brightness of the RGB LEDs (NB. This value is between 0 and 255 but max brightness is set by the pb2.setBrightness() method)
+int wait = 800; // This is the delay in ms between LED colour changes
 
+// This function runs over and over, and is where you do the magic to light your leds.
 void loop()
 {
-  pb2.pixelAllSet(CRGB(bright, 0, 0));  // The pixelAllSet() function takes a CRGB type as an argument, This is created with three inputs for Red, Green and Blue levels
-  delay(wait);
-  pb2.pixelAllSet(CRGB(0, bright, 0));
-  delay(wait);
-  pb2.pixelAllSet(CRGB(0, 0, bright));
-  delay(wait);
-  pb2.pixelAllSet(CRGB(bright, bright, bright));  // set all colours on for White
-  delay(wait);
   pb2.pixelAllOff();
-  pb2.setBlueLED(ON);
   delay(wait);
-  pb2.setBlueLED(OFF);
+  pb2.pixelAllSet(CRGB(255,0,0));
+  delay(wait);
+  pb2.pixelAllSet(CRGB(0,255,0));
+  delay(wait);
+  pb2.pixelAllSet(CRGB(0,0,255));
+  delay(wait);
+  pb2.pixelAllSet(CRGB(255,255,255));
+  delay(wait);
 }
 
 

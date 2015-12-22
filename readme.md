@@ -30,7 +30,7 @@ Install the Picobot2 library using the Arduino IDE library manager.
 This will also install the following example files within the examples folder of the IDE
 You will also need to install the FastLED library: In the Arduino IDE, go to the Menu item Sketch/Include Library/Manage Libraries then search for FastLED and select Install.
 
- - DemoAll - Uses the Mode button to switch between 5 different demos.
+ - **DemoAll** - Uses the Mode button to switch between 5 different demos.
    After pressing the button it flashes the LEDs the number of times for
    the following demos:
    	1. Flash all the LEDs
@@ -38,11 +38,20 @@ You will also need to install the FastLED library: In the Arduino IDE, go to the
    	3. Light Seeker
    	4. Obstacle avoider
    	5. Constant distance
- - LEDTest - Flashes all the LEDs
- - AnalogTest - outputs analog values from light and line following
+ - **LEDTest** - Flashes all the LEDs
+ - **AnalogTest** - outputs analog values from light and line following
    sensors to Serial Monitor (also to Bluetooth if present)
- - MotorTest - Turns the motors Forwards, Reverse, Spin Left, Spin
+ - **MotorTest** - Turns the motors Forwards, Reverse, Spin Left, Spin
    Right, Halt in turn
- - UltraTest - Outputs the distance reading from the Ultrasonic sensor
+ - **UltraTest** - Outputs the distance reading from the Ultrasonic sensor
    to the Serial Monitor
+
+
+----------
+
+
+There are a couple of other examples programs as well:
+
+ - **Tweetbot** This was written by Carl Monk and allows you to tweet settings to the Picobot2 (assuming you have it fitted with a WiFi module. Visit [Carl's Github](https://github.com/ForToffee/Picobot2/tree/master/TweetBot) for latest information
+ - **ScratchPicobot**. This is an experimental program by Simon Walters and allows the WIFi connected Picobot2 to be controlled directly by a Scratch 1.4 program running on the same network as the Picobot2. 
 

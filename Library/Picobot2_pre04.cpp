@@ -1,7 +1,6 @@
 /*
   Picobot2.cpp - Library for basic functionality of Picobot2
   Created by Gareth Davies, 4tronix, November 2015
-  Valid for version Picobot2 0.4 onwards
   Released into the public domain
   ---
   Supports the following features:
@@ -11,20 +10,14 @@
   Ultrasonic: Get distance to nearest object
   Mode switch: Read boolean value (true == pressed)
   RGB Pixels: Set brightness, All off, All set RGB, Individual off, Individual set RGB
-  Accelerometer (TBD): Read X, Y, Z; check Tap and Shake
   ---
   Bluetooth and ESP8266 not supported within this library
 */
 
 #include "Picobot2.h"
-#include <Wire.h>
 
 // Constructor
 Picobot2::Picobot2()
-{
-}
-
-void Picobot2::begin()
 {
 	// set output pins
 	pinMode(LMA, OUTPUT);
@@ -41,24 +34,15 @@ void Picobot2::begin()
 	// Initialise RGB pixels
 	FastLED.addLeds<WS2812B, pixels, RGB>(leds, ledCount);
 	FastLED.setBrightness(initialBrightness);
-
-	// Setup the accelerometer
-	/* --- No accelerometer
-	Wire.begin();
-	accelWrite(regMODE, 0x00);	// set mode to standby so we can set up the registers
-	accelWrite(regINTSU, 0x04);	// Set tap interrupt to enable
-	accelWrite(regSR, 0x00);	// 120 samples per second and set Tap detection mode
-	accelWrite(regMODE, 0x01);	// set mode to Active
-	--- */
 }
 
 // Motor functions
 void Picobot2::forward(int speed)
 {
-	analogWrite(LMA, speed);
-	analogWrite(RMA, speed);
-	digitalWrite(LMB, LOW);
-	digitalWrite(RMB, LOW);
+	analogWrite(LMB, 255-speed);
+	analogWrite(RMB, 255-speed);
+	digitalWrite(LMA, HIGH);
+	digitalWrite(RMA, HIGH);
 }
 
 void Picobot2::reverse(int speed)
@@ -73,33 +57,33 @@ void Picobot2::stop(bool brake)
 {
 	if (brake)
 	{
-		digitalWrite(LMA, HIGH);
-		digitalWrite(RMA, HIGH);
 		digitalWrite(LMB, HIGH);
 		digitalWrite(RMB, HIGH);
+		digitalWrite(LMA, HIGH);
+		digitalWrite(RMA, HIGH);
 	}
 	else
 		{
-		digitalWrite(LMA, LOW);
-		digitalWrite(RMA, LOW);
 		digitalWrite(LMB, LOW);
 		digitalWrite(RMB, LOW);
+		digitalWrite(LMA, LOW);
+		digitalWrite(RMA, LOW);
 	}
 }
 
 void Picobot2::spinLeft(int speed)
 {
 	analogWrite(LMB, speed);
-	analogWrite(RMA, speed);
+	analogWrite(RMB, 255-speed);
 	digitalWrite(LMA, LOW);
-	digitalWrite(RMB, LOW);
+	digitalWrite(RMA, HIGH);
 }
 
 void Picobot2::spinRight(int speed)
 {
-	analogWrite(LMA, speed);
+	analogWrite(LMB, 255-speed);
 	analogWrite(RMB, speed);
-	digitalWrite(LMB, LOW);
+	digitalWrite(LMA, HIGH);
 	digitalWrite(RMA, LOW);
 }
 
@@ -121,7 +105,7 @@ void Picobot2::turnReverse(int speedLeft, int speedRight)
 // End of Motor Functions
 
 // Sensor Reading Functions
-int Picobot2::lineRead(bool left)
+byte Picobot2::lineRead(bool left)
 {
 	if (left)
 		return analogRead(leftLine);
@@ -129,7 +113,7 @@ int Picobot2::lineRead(bool left)
 		return analogRead(rightLine);
 }
 
-int Picobot2::lightRead(bool left)
+byte Picobot2::lightRead(bool left)
 {
 	if (left)
 		return analogRead(leftLight);
@@ -153,7 +137,7 @@ int Picobot2::distanceRead()
 
 	long duration = pulseIn(sonicEcho, HIGH);
 
-	rval = duration / 29L / 2L;
+	rval = duration / 29 / 2;
 	return rval;
 }
 // End of Sensor reading
@@ -211,42 +195,3 @@ void Picobot2::setBlueLED(bool LEDon)
 		digitalWrite(blueLED, LOW);
 }
 
-/* --- No accelerometer
-void Picobot2::accelWrite(byte reg, byte data)
-{
-	Wire.beginTransmission(accelI2C);
-	Wire.write(reg);
-	Wire.write(data);
-	Wire.endTransmission();
-}
-
-void Picobot2::accelRead(int *x, int *y, int *z)
-{
-	Wire.beginTransmission(accelI2C);
-	Wire.write(regXOUT);  // Start reading from x register
-	Wire.endTransmission();
-	Wire.requestFrom(accelI2C, 3); // read 3 consecutive registers
-	if(Wire.available())
-	{
-		*x = Wire.read();
-		*y = Wire.read();
-		*z = Wire.read();
-	}
-	*x=((*x)<<2)/4;
-	*y=((*y)<<2)/4;
-	*z=((*z)<<2)/4;
-}
-
-bool Picobot2::tapRead()
-{
-	byte tap = 0;
-	Wire.beginTransmission(accelI2C);
-	Wire.write(regTILT);  // Start reading from x register
-	Wire.endTransmission();
-	Wire.requestFrom(accelI2C, 1); // read 1 byte
-	if(Wire.available())
-		tap = Wire.read();
-	return ((tap & 0x20) == 0x20);
-}
-
---- */
